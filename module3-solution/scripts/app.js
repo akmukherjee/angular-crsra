@@ -12,6 +12,7 @@ function FoundItemsDirective() {
 		scope: {
 			found: '<',
 			onRemove: '&',
+			empty: '<'
 			
 		}
 	};
@@ -22,14 +23,16 @@ NarrowItDownController.$inject = ['MenuSearchService'];
 function NarrowItDownController (MenuSearchService) {
 	var ctrl = this;
 	ctrl.searchTerm = '';
+	ctrl.empty = '';
 	
-
+	var nothingMessage = 'Nothing Found';
 	ctrl.searchItem = function () {
 
 		if (ctrl.searchTerm !== '') {
 			var promise = MenuSearchService.getMatchedMenuItems(ctrl.searchTerm);
 			promise.then(function(result) {
 				ctrl.found = result;
+				ctrl.empty = MenuSearchService.isEmpty();
 				
 			})
 			.catch(function(error) {
@@ -51,11 +54,12 @@ function MenuSearchService ($http, searchTerm) {
 	var service = this;
 	var foundItems = [];
 	
-
+	var notFoundMessage = 'Nothing Found!';
 	service.getMatchedMenuItems = function (searchTerm) {
 		
 		searchTerm = searchTerm.trim().toLowerCase();
 		var API_BASE_PATH = "https://davids-restaurant.herokuapp.com";
+		
 		return $http ({
 			method: "GET",
 			url: (API_BASE_PATH+"/menu_items.json")
@@ -80,7 +84,10 @@ function MenuSearchService ($http, searchTerm) {
 		foundItems.splice(itemIndex, 1);
 		return foundItems;
 	};
-
+	service.isEmpty = function () {
+			
+		return notFoundMessage;
+	};
 
 }
 
